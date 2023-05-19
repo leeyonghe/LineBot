@@ -1,0 +1,41 @@
+FROM ubuntu:latest
+
+ENV LINE_CHANNEL_SECRET=???????
+ENV LINE_CHANNEL_ACCESS_TOKEN=???????
+
+RUN apt update
+RUN apt-get install build-essential -y
+RUN apt-get install git -y
+RUN apt-get install cmake -y
+RUN apt install -y tzdata
+RUN apt-get install zlib1g-dev -y
+RUN apt-get install libssl-dev -y
+RUN apt-get install gperf -y
+RUN apt-get install vim -y
+RUN apt-get install wget -y
+RUN apt-get install python3 -y
+RUN apt-get install python3-pip -y
+RUN pip install setuptools
+RUN pip install telebot
+RUN pip install line-bot-sdk
+RUN pip install fastapi
+RUN pip install uvicorn[standard]
+
+ENV TZ=Asia/Seoul
+RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
+
+WORKDIR /root
+
+RUN mkdir /root/application
+
+COPY ./application/main.py /root/application/main.py
+
+RUN git clone --recursive https://github.com/line/line-bot-sdk-python.git
+
+RUN cd line-bot-sdk-python && python3 setup.py install
+
+WORKDIR /root/application
+
+EXPOSE 8000
+
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0" ,"--port" ,"8000"]
